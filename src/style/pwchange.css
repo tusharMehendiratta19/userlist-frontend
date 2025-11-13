@@ -1,0 +1,117 @@
+/* === Container Styles === */
+.passwordchange-container {
+  max-width: 400px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  font-family: "Inter", Arial, sans-serif;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.passwordchange-container:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+/* === Header === */
+.passwordchange-container h2 {
+  text-align: center;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+/* === Form Layout === */
+.passwordchange-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* === Input Fields === */
+.passwordchange-form input {
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.passwordchange-form input:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.3);
+}
+
+.passwordchange-form input::placeholder {
+  color: #aaa;
+}
+
+/* === Action Buttons === */
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.submit-btn {
+  flex: 1;
+  background: #007bff;
+  color: #fff;
+  font-weight: 600;
+  padding: 0.7rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+  margin-right: 0.5rem;
+}
+
+.submit-btn:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+}
+
+.close-btn {
+  flex: 1;
+  background: #f0f0f0;
+  color: #333;
+  font-weight: 600;
+  padding: 0.7rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.close-btn:hover {
+  background: #ddd;
+  transform: translateY(-1px);
+}
+
+/* === Responsive === */
+@media (max-width: 500px) {
+  .passwordchange-container {
+    margin: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  .passwordchange-form input,
+  .submit-btn,
+  .close-btn {
+    font-size: 0.9rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .submit-btn,
+  .close-btn {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+  }
+}

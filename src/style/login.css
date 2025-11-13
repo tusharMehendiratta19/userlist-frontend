@@ -1,0 +1,102 @@
+.login-container {
+  max-width: 400px;
+  margin: 5rem auto;
+  padding: 2.5rem;
+  background: #fff8f6;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  font-family: "Poppins", sans-serif;
+}
+
+.login-container h2 {
+  margin-bottom: 1.5rem;
+  color: #333;
+  font-size: 1.8rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.login-form input {
+  padding: 0.9rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.3s, box-shadow 0.3s;
+}
+
+.login-form input:focus {
+  border-color: #ff7f50;
+  box-shadow: 0 0 4px rgba(255, 127, 80, 0.4);
+}
+
+.login-btn {
+  background: #ff7f50;
+  color: white;
+  font-size: 1.05rem;
+  padding: 0.9rem 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.login-btn:hover {
+  background: #ff6333;
+  transform: translateY(-1px);
+}
+
+.login-container p {
+  margin-top: 1.2rem;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.login-container p span {
+  color: #ff7f50;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.login-container p span:hover {
+  color: #ff4f1a;
+  text-decoration: underline;
+}
+
+/* "Forgot Password" link styling */
+.login-container p:first-of-type {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #777;
+  cursor: pointer;
+}
+
+.login-container p:first-of-type:hover {
+  color: #ff7f50;
+  text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .login-container {
+    margin: 2rem;
+    padding: 1.8rem;
+  }
+
+  .login-container h2 {
+    font-size: 1.5rem;
+  }
+
+  .login-form input,
+  .login-btn {
+    font-size: 0.95rem;
+  }
+}
