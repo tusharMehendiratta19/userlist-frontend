@@ -1,42 +1,45 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import UpdatePage from './UpdatePage';
 import '../style/list.css';
+import SignupPage from './SignupPage';
 
 const List = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [isEditing, setIsEditing] = useState(false);
-
-    const custId = sessionStorage.getItem('custId') || null;
     const name = sessionStorage.getItem('name') || null;
     const loginTime = sessionStorage.getItem('loginTime') || null;
     const navigate = useNavigate();
+    const [skip, setSkip] = useState(0);
+    const [limit, setLimit] = useState(5);
+    const [totalUsers, setTotalUsers] = useState(0);
+    const pageNo = skip / limit + 1;
+
+    const fetchUsers = async (skip, limit) => {
+        try {
+            const response = await axios.get(
+                `http://localhost:5000/v1/users/getAllUsers?skip=${skip}&limit=${limit}`,
+                { withCredentials: true }
+            );
+
+            if (response.status !== 200) {
+                throw new Error(response.data?.message || "Failed to fetch users");
+            }
+
+            setUsers(response.data.users);
+            setTotalUsers(response.data.total || 0);
+            setError(""); // clear any previous error
+        } catch (err) {
+            console.error("Error fetching users:", err);
+            setError(err.response?.data?.message || "Session expired or unauthorized access");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const response = await axios.get(
-                    `http://localhost:5000/v1/users/getAllUsers`,
-                    { withCredentials: true }
-                );
-
-                if (response.status !== 200) {
-                    throw new Error(response.data?.message || "Failed to fetch users");
-                }
-
-                setUsers(response.data.users);
-                setError(""); // clear any previous error
-            } catch (err) {
-                console.error("Error fetching users:", err);
-                setError(err.response?.data?.message || "Session expired or unauthorized access");
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchUsers();
+        fetchUsers(skip, limit);
     }, []);
 
     const handleLogout = async () => {
@@ -47,6 +50,20 @@ const List = () => {
         } catch (error) {
             console.error("Logout failed:", error);
             alert("Error logging out. Try again.");
+        }
+    };
+
+    const handleNext = (currentSkip) => {
+        if (currentSkip + 5 < totalUsers) {
+            setSkip(currentSkip + 5);
+            fetchUsers(currentSkip + 5, limit);
+        }
+    };
+
+    const handlePrevious = (currentSkip) => {
+        if (currentSkip >= 5) {
+            setSkip(currentSkip - 5);
+            fetchUsers(currentSkip - 5, limit);
         }
     };
 
@@ -89,9 +106,15 @@ const List = () => {
 
             <div className="table-container">
                 <h2>User List</h2>
+                <div className="table-info">
+                    <button className="add-user-btn" onClick={() => navigate("/signup")}>Add New User</button>
+                    <p>Page: {pageNo}</p>
+                    <p>Total Users: {totalUsers}</p>
+                </div>
                 <table border="1" className="user-table">
                     <thead>
                         <tr>
+                            <th>S.No.</th>
                             <th>Name</th>
                             <th>Email</th>
                             <th>Gender</th>
@@ -101,8 +124,9 @@ const List = () => {
                         </tr>
                     </thead>
                     <tbody className="user-table-body">
-                        {users.map((user) => (
+                        {users.map((user,index) => (
                             <tr key={user._id}>
+                                <td>{index+1}</td>
                                 <td>{user.firstName} {user.lastName}</td>
                                 <td>{user.email}</td>
                                 <td>{user.gender}</td>
@@ -128,9 +152,11 @@ const List = () => {
                         ))}
                     </tbody>
                 </table>
+                <div className='pagination'>
+                    <button className="page-btn" onClick={() => handlePrevious(skip)}>Previous</button>
+                    <button className="page-btn" onClick={() => handleNext(skip)}>Next</button>
+                </div>
             </div>
-
-            {isEditing && <UpdatePage custId={custId} />}
         </div>
     );
 };

@@ -1,0 +1,127 @@
+[
+  {
+    "country": "United States",
+    "states": [
+      {
+        "name": "California",
+        "cities": ["Los Angeles", "San Francisco", "San Diego", "Sacramento", "San Jose"]
+      },
+      {
+        "name": "Texas",
+        "cities": ["Houston", "Dallas", "Austin", "San Antonio", "Fort Worth"]
+      },
+      {
+        "name": "New York",
+        "cities": ["New York City", "Buffalo", "Rochester", "Albany", "Syracuse"]
+      },
+      {
+        "name": "Florida",
+        "cities": ["Miami", "Orlando", "Tampa", "Jacksonville", "Tallahassee"]
+      },
+      {
+        "name": "Illinois",
+        "cities": ["Chicago", "Springfield", "Peoria", "Naperville", "Rockford"]
+      }
+    ]
+  },
+  {
+    "country": "Canada",
+    "states": [
+      {
+        "name": "Ontario",
+        "cities": ["Toronto", "Ottawa", "London", "Hamilton", "Mississauga"]
+      },
+      {
+        "name": "British Columbia",
+        "cities": ["Vancouver", "Victoria", "Surrey", "Kelowna", "Burnaby"]
+      },
+      {
+        "name": "Alberta",
+        "cities": ["Calgary", "Edmonton", "Red Deer", "Lethbridge", "Medicine Hat"]
+      },
+      {
+        "name": "Quebec",
+        "cities": ["Montreal", "Quebec City", "Laval", "Gatineau", "Sherbrooke"]
+      },
+      {
+        "name": "Manitoba",
+        "cities": ["Winnipeg", "Brandon", "Steinbach", "Thompson", "Portage la Prairie"]
+      }
+    ]
+  },
+  {
+    "country": "India",
+    "states": [
+      {
+        "name": "Maharashtra",
+        "cities": ["Mumbai", "Pune", "Nagpur", "Nashik", "Thane"]
+      },
+      {
+        "name": "Karnataka",
+        "cities": ["Bengaluru", "Mysuru", "Mangaluru", "Hubballi", "Belagavi"]
+      },
+      {
+        "name": "Tamil Nadu",
+        "cities": ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem"]
+      },
+      {
+        "name": "Uttar Pradesh",
+        "cities": ["Lucknow", "Kanpur", "Varanasi", "Agra", "Noida"]
+      },
+      {
+        "name": "Gujarat",
+        "cities": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Gandhinagar"]
+      }
+    ]
+  },
+  {
+    "country": "United Kingdom",
+    "states": [
+      {
+        "name": "England",
+        "cities": ["Manchester", "Birmingham", "Liverpool", "Leeds", "Newcastle"]
+      },
+      {
+        "name": "Scotland",
+        "cities": ["Edinburgh", "Glasgow", "Aberdeen", "Dundee", "Inverness"]
+      },
+      {
+        "name": "Wales",
+        "cities": ["Cardiff", "Swansea", "Newport", "Wrexham", "Bangor"]
+      },
+      {
+        "name": "Northern Ireland",
+        "cities": ["Belfast", "Derry", "Lisburn", "Newry", "Armagh"]
+      },
+      {
+        "name": "Greater London",
+        "cities": ["London", "Croydon", "Watford", "Wembley", "Richmond"]
+      }
+    ]
+  },
+  {
+    "country": "Australia",
+    "states": [
+      {
+        "name": "New South Wales",
+        "cities": ["Sydney", "Newcastle", "Wollongong", "Parramatta", "Dubbo"]
+      },
+      {
+        "name": "Victoria",
+        "cities": ["Melbourne", "Geelong", "Ballarat", "Bendigo", "Shepparton"]
+      },
+      {
+        "name": "Queensland",
+        "cities": ["Brisbane", "Gold Coast", "Cairns", "Townsville", "Toowoomba"]
+      },
+      {
+        "name": "Western Australia",
+        "cities": ["Perth", "Fremantle", "Bunbury", "Geraldton", "Albany"]
+      },
+      {
+        "name": "South Australia",
+        "cities": ["Adelaide", "Mount Gambier", "Whyalla", "Gawler", "Port Augusta"]
+      }
+    ]
+  }
+]
