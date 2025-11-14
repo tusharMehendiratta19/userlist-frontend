@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../style/signup.css";
+import { useSelector, useDispatch } from "react-redux";
+import { setUserData } from "../redux/userSlice";
 
 const SignupPage = () => {
     const [firstName, setFirstName] = useState("");
@@ -20,9 +22,10 @@ const SignupPage = () => {
     const [states, setStates] = useState([]);
     const [cities, setCities] = useState([]);
     const [allLocations, setAllLocations] = useState([]);
+    const { name, userId } = useSelector((state) => state.user);
 
     const navigate = useNavigate();
-
+    const dispatch = useDispatch();
     // Fetch location data
     useEffect(() => {
         async function getLocation() {
@@ -109,10 +112,11 @@ const SignupPage = () => {
             });
 
             if (response.status === 201) {
-                if (sessionStorage.getItem("custId") === null) {
-                    sessionStorage.setItem("custId", response.data.userId);
-                    sessionStorage.setItem("name", response.data.userName);
-                    sessionStorage.setItem("loginTime", new Date().toLocaleString());
+                if (userId === null) {
+                    dispatch(setUserData({
+                        userId: response.data.userId,
+                        name: response.data.name
+                    }));
                 }
                 navigate("/");
             }

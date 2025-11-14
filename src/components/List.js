@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../style/list.css';
 import SignupPage from './SignupPage';
+import { useSelector, useDispatch } from "react-redux";
+import { clearUserData } from "../redux/userSlice";
 
 const List = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const name = sessionStorage.getItem('name') || null;
-    const loginTime = sessionStorage.getItem('loginTime') || null;
+    const dispatch = useDispatch();
+    const { name, loginTime } = useSelector((state) => state.user);
     const navigate = useNavigate();
     const [skip, setSkip] = useState(0);
     const [limit, setLimit] = useState(5);
@@ -45,7 +47,7 @@ const List = () => {
     const handleLogout = async () => {
         try {
             await axios.post("http://localhost:5000/v1/auth/logout", {}, { withCredentials: true });
-            sessionStorage.clear();
+            dispatch(clearUserData())
             navigate("/login");
         } catch (error) {
             console.error("Logout failed:", error);
@@ -124,9 +126,9 @@ const List = () => {
                         </tr>
                     </thead>
                     <tbody className="user-table-body">
-                        {users.map((user,index) => (
+                        {users.map((user, index) => (
                             <tr key={user._id}>
-                                <td>{index+1}</td>
+                                <td>{index + 1}</td>
                                 <td>{user.firstName} {user.lastName}</td>
                                 <td>{user.email}</td>
                                 <td>{user.gender}</td>

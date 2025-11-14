@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import '../style/signup.css';
+import { useSelector, useDispatch } from "react-redux";
+import { setUserData } from "../redux/userSlice";
 
 const UpdatePage = (props) => {
     const [firstName, setFirstName] = useState("");
@@ -24,6 +26,7 @@ const UpdatePage = (props) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { custId } = location.state || {};
+    const dispatch = useDispatch();
     // Fetch location data
     useEffect(() => {
         async function getLocation() {
@@ -134,7 +137,14 @@ const UpdatePage = (props) => {
                 zipcode,
                 interest
             }, { withCredentials: true });
-            navigate("/");
+            if (response.status === 200) {
+                dispatch(setUserData({
+                    name: firstName + " " + lastName,
+                }));
+                navigate("/");
+            } else {
+                alert("Error updating user. Please try again.");
+            }
         } catch (error) {
             console.error("Error creating user:", error);
         }
@@ -162,7 +172,7 @@ const UpdatePage = (props) => {
             <form className="signup-form" onSubmit={handleSubmit}>
                 <input type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
                 <input type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
-                <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} disabled />
 
                 {/* Gender dropdown */}
                 <select value={gender} onChange={(e) => setGender(e.target.value)} required>
