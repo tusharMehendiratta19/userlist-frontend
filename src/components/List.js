@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import '../style/list.css';
-import SignupPage from './SignupPage';
 import { useSelector, useDispatch } from "react-redux";
 import { clearUserData } from "../redux/userSlice";
+import Snackbar from './Snackbar';
+import constants from '../constants';
+import { logoutUser } from "../api/authApi";
+import { getAllUsers, deleteUser as apiDeleteUser } from "../api/userApi";
 
 const List = () => {
     const [users, setUsers] = useState([]);
@@ -17,13 +19,16 @@ const List = () => {
     const [limit, setLimit] = useState(5);
     const [totalUsers, setTotalUsers] = useState(0);
     const pageNo = skip / limit + 1;
+    const [snack, setSnack] = useState({ open: false, message: "", type: "" });
+
+    const showSnack = (msg, type) => {
+        setSnack({ open: true, message: msg, type });
+        setTimeout(() => setSnack({ open: false, message: "", type: "" }), 3000);
+    };
 
     const fetchUsers = async (skip, limit) => {
         try {
-            const response = await axios.get(
-                `http://localhost:5000/v1/users/getAllUsers?skip=${skip}&limit=${limit}`,
-                { withCredentials: true }
-            );
+            const response = await getAllUsers(skip, limit);
 
             if (response.status !== 200) {
                 throw new Error(response.data?.message || "Failed to fetch users");
@@ -31,7 +36,7 @@ const List = () => {
 
             setUsers(response.data.users);
             setTotalUsers(response.data.total || 0);
-            setError(""); // clear any previous error
+            setError("");
         } catch (err) {
             console.error("Error fetching users:", err);
             setError(err.response?.data?.message || "Session expired or unauthorized access");
@@ -46,12 +51,13 @@ const List = () => {
 
     const handleLogout = async () => {
         try {
-            await axios.post("http://localhost:5000/v1/auth/logout", {}, { withCredentials: true });
+            await logoutUser();
             dispatch(clearUserData())
-            navigate("/login");
+            showSnack(constants.loginSuccessMsg, constants.success);
+            setTimeout(() => navigate("/login"), 1000);
         } catch (error) {
             console.error("Logout failed:", error);
-            alert("Error logging out. Try again.");
+            showSnack(constants.login_failed, constants.error);
         }
     };
 
@@ -69,17 +75,22 @@ const List = () => {
         }
     };
 
+    const handleUpdate = (userId) => {
+        if (name !== null) {
+            navigate("/updateDetails", { state: { custId: userId } });
+        }
+    };
+
     const deleteUser = async (userId) => {
         console.log("Deleting user with ID:", userId);
         try {
-            await axios.delete(
-                `http://localhost:5000/v1/users/deleteUser/${userId}`,
-                { withCredentials: true }
-            );
+            await apiDeleteUser(userId);
+            showSnack(constants.user_delete_success, constants.success);
             setUsers(users.filter((user) => user._id !== userId));
+            setTotalUsers(totalUsers - 1);
         } catch (error) {
             console.error("Error deleting user:", error);
-            alert("Failed to delete user. Please try again.");
+            showSnack(constants.user_delete_failed, constants.error);
         }
     };
 
@@ -87,78 +98,90 @@ const List = () => {
         return <div className="loading">Loading...</div>;
     }
 
-    if (error) {
-        return (
-            <div className="error-container">
-                <h2>{error}</h2>
-                <button className="login-btn" onClick={() => navigate("/login")}>
-                    Go to Login
-                </button>
-            </div>
-        );
-    }
+    // if (error) {
+    //     return (
+    //         <div className="error-container">
+    //             <h2>{error}</h2>
+    //             <button className="login-btn" onClick={() => navigate("/login")}>
+    //                 Go to Login
+    //             </button>
+    //         </div>
+    //     );
+    // }
+
+    console.log("Users data:", users);
 
     return (
-        <div className="main-container">
-            <div className="header">
-                <p>Login Time: {loginTime}</p>
-                <p>Logged in as: {name}</p>
-                <button onClick={handleLogout}>Log Out</button>
-            </div>
+        <div>
+            <div className="main-container">
+                <div className="header">
+                    <p>Login Time: {loginTime}</p>
+                    <p>Logged in as: {name}</p>
+                    <button onClick={handleLogout}>Log Out</button>
+                </div>
 
-            <div className="table-container">
-                <h2>User List</h2>
-                <div className="table-info">
-                    <button className="add-user-btn" onClick={() => navigate("/signup")}>Add New User</button>
-                    <p>Page: {pageNo}</p>
-                    <p>Total Users: {totalUsers}</p>
-                </div>
-                <table border="1" className="user-table">
-                    <thead>
-                        <tr>
-                            <th>S.No.</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Gender</th>
-                            <th>Address</th>
-                            <th>Area of Interest</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="user-table-body">
-                        {users.map((user, index) => (
-                            <tr key={user._id}>
-                                <td>{index + 1}</td>
-                                <td>{user.firstName} {user.lastName}</td>
-                                <td>{user.email}</td>
-                                <td>{user.gender}</td>
-                                <td>{user.city}, {user.state}, {user.country} - {user.zipcode}</td>
-                                <td>
-                                    {Array.isArray(user.interest)
-                                        ? user.interest.map((intr) => (
-                                            <span key={intr}>{intr} </span>
-                                        ))
-                                        : user.interest}
-                                </td>
-                                <td>
-                                    <button
-                                        onClick={() =>
-                                            navigate("/updateDetails", { state: { custId: user._id } })
-                                        }
-                                    >
-                                        Edit
-                                    </button>
-                                    <button onClick={() => deleteUser(user._id)}>Delete</button>
-                                </td>
+                <div className="table-container">
+                    <h2>User List</h2>
+                    <div className="table-info">
+                        <button className="add-user-btn" onClick={() => navigate("/signup")}>Add New User</button>
+                        <p>Page: {pageNo}</p>
+                        <p>Total Users: {totalUsers}</p>
+                    </div>
+                    <table border="1" className="user-table">
+                        <thead>
+                            <tr>
+                                <th>S.No.</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Gender</th>
+                                <th>Address</th>
+                                <th>Area of Interest</th>
+                                {/* <th>profile</th> */}
+                                <th>Actions</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-                <div className='pagination'>
-                    <button className="page-btn" onClick={() => handlePrevious(skip)}>Previous</button>
-                    <button className="page-btn" onClick={() => handleNext(skip)}>Next</button>
+                        </thead>
+                        <tbody className="user-table-body">
+                            {users.map((user, index) => (
+                                <tr key={user._id}>
+                                    <td>{index + 1}</td>
+                                    <td>{user.firstName} {user.lastName}</td>
+                                    <td>{user.email}</td>
+                                    <td>{user.gender}</td>
+                                    <td>{user.city}, {user.state}, {user.country} - {user.zipcode}</td>
+                                    <td>
+                                        {Array.isArray(user.interest)
+                                            ? user.interest.map((intr) => (
+                                                <span key={intr}>{intr} </span>
+                                            ))
+                                            : user.interest}
+                                    </td>
+                                    {/* <td>
+                                        <img
+                                            src={user.profileImage ? `${constants.base_url}${user.profileImage}` : "/default-avatar.png"}
+                                            alt="profile"
+                                            style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover" }}
+                                        />
+                                    </td> */}
+
+                                    <td>
+                                        <button
+                                            onClick={() => handleUpdate(user._id)}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button onClick={() => deleteUser(user._id)}>Delete</button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    <div className='pagination'>
+                        <button className="page-btn" onClick={() => handlePrevious(skip)}>Previous</button>
+                        <button className="page-btn" onClick={() => handleNext(skip)}>Next</button>
+                    </div>
                 </div>
             </div>
+            <Snackbar open={snack.open} message={snack.message} type={snack.type} />
         </div>
     );
 };

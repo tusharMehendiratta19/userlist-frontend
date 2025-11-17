@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
 import '../style/signup.css';
 import { useSelector, useDispatch } from "react-redux";
 import { setUserData } from "../redux/userSlice";
+import Snackbar from "./Snackbar";
+import constants from '../constants';
+import { locationsList, getUserById, updateUser } from "../api/userApi";
 
 const UpdatePage = (props) => {
     const [firstName, setFirstName] = useState("");
@@ -27,11 +29,17 @@ const UpdatePage = (props) => {
     const location = useLocation();
     const { custId } = location.state || {};
     const dispatch = useDispatch();
+    const [snack, setSnack] = useState({ open: false, message: "", type: "" });
+
+    const showSnack = (msg, type) => {
+        setSnack({ open: true, message: msg, type });
+        setTimeout(() => setSnack({ open: false, message: "", type: "" }), 3000);
+    };
     // Fetch location data
     useEffect(() => {
         async function getLocation() {
             try {
-                const response = await axios.get("http://localhost:5000/v1/users/locations");
+                const response = await locationsList();
                 const locationData = response.data.locations || [];
                 setAllLocations(locationData);
 
@@ -97,9 +105,7 @@ const UpdatePage = (props) => {
 
         const fetchCustomerDetails = async () => {
             try {
-                const { data } = await axios.get(`http://localhost:5000/v1/users/getUserData/${custId}`,
-                    { withCredentials: true }
-                );
+                const { data } = await getUserById(custId);
                 if (cancel) return; // skip state updates if unmounted
                 const user = data.user;
                 setFirstName(user.firstName);
@@ -126,7 +132,7 @@ const UpdatePage = (props) => {
         e.preventDefault();
 
         try {
-            const response = await axios.post("http://localhost:5000/v1/users/updateUser", {
+            const response = await updateUser({
                 firstName,
                 lastName,
                 email,
@@ -136,17 +142,18 @@ const UpdatePage = (props) => {
                 country,
                 zipcode,
                 interest
-            }, { withCredentials: true });
+            })
             if (response.status === 200) {
                 dispatch(setUserData({
                     name: firstName + " " + lastName,
                 }));
-                navigate("/");
+                showSnack(constants.user_update_success, constants.success);
+                setTimeout(() => navigate("/"), 1000);
             } else {
-                alert("Error updating user. Please try again.");
+                showSnack(constants.user_update_failed, constants.error);
             }
         } catch (error) {
-            console.error("Error creating user:", error);
+            showSnack(constants.user_update_failed, constants.error);
         }
     };
 
@@ -167,80 +174,83 @@ const UpdatePage = (props) => {
     }, [allLocations, country, state]);
 
     return (
-        <div className="signup-container">
-            <h2>Update Details</h2>
-            <form className="signup-form" onSubmit={handleSubmit}>
-                <input type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
-                <input type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
-                <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} disabled />
+        <div>
+            <div className="signup-container">
+                <h2>Update Details</h2>
+                <form className="signup-form" onSubmit={handleSubmit}>
+                    <input type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+                    <input type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+                    <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} disabled />
 
-                {/* Gender dropdown */}
-                <select value={gender} onChange={(e) => setGender(e.target.value)} required>
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                </select>
+                    {/* Gender dropdown */}
+                    <select value={gender} onChange={(e) => setGender(e.target.value)} required>
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
 
-                {/* Country dropdown */}
-                <select value={country} onChange={handleCountryChange} required>
-                    <option value="">Select Country</option>
-                    {countries.map((c, idx) => (
-                        <option key={idx} value={c}>
-                            {c}
-                        </option>
-                    ))}
-                </select>
-
-                {/* State dropdown */}
-                <select value={state} onChange={handleStateChange} disabled={!country} required>
-                    <option value="">Select State</option>
-                    {states.map((s, idx) => (
-                        <option key={idx} value={s}>
-                            {s}
-                        </option>
-                    ))}
-                </select>
-
-                {/* City dropdown */}
-                <select value={city} onChange={(e) => setCity(e.target.value)} disabled={!state} required>
-                    <option value="">Select City</option>
-                    {cities.map((city, idx) => (
-                        <option key={idx} value={city}>
-                            {city}
-                        </option>
-                    ))}
-                </select>
-
-                <input type="tel" minLength={6} maxLength={6} placeholder="Zipcode" value={zipcode} onChange={(e) => setZipcode(e.target.value)} required />
-
-                {/* Area of Interest */}
-                <div className="interest-group" role="group" aria-label="Area of Interest">
-                    <label className="interest-title">Area of Interest:</label>
-                    <div className="interest-options">
-                        {interestOptions.map((opt) => (
-                            <label key={opt} className="checkbox-label">
-                                <input
-                                    type="checkbox"
-                                    value={opt}
-                                    checked={Array.isArray(interest) && interest.includes(opt)}
-                                    onChange={() => toggleInterest(opt)}
-                                />
-                                {opt.charAt(0).toUpperCase() + opt.slice(1)}
-                            </label>
+                    {/* Country dropdown */}
+                    <select value={country} onChange={handleCountryChange} required>
+                        <option value="">Select Country</option>
+                        {countries.map((c, idx) => (
+                            <option key={idx} value={c}>
+                                {c}
+                            </option>
                         ))}
-                    </div>
-                </div>
+                    </select>
 
-                <div className="actionButtons">
-                    <button type="submit" className="submitData">
-                        Update
-                    </button>
-                    <button type="button" className="closeBox" onClick={() => navigate("/")}>
-                        Cancel
-                    </button>
-                </div>
-            </form>
+                    {/* State dropdown */}
+                    <select value={state} onChange={handleStateChange} disabled={!country} required>
+                        <option value="">Select State</option>
+                        {states.map((s, idx) => (
+                            <option key={idx} value={s}>
+                                {s}
+                            </option>
+                        ))}
+                    </select>
+
+                    {/* City dropdown */}
+                    <select value={city} onChange={(e) => setCity(e.target.value)} disabled={!state} required>
+                        <option value="">Select City</option>
+                        {cities.map((city, idx) => (
+                            <option key={idx} value={city}>
+                                {city}
+                            </option>
+                        ))}
+                    </select>
+
+                    <input type="tel" minLength={6} maxLength={6} placeholder="Zipcode" value={zipcode} onChange={(e) => setZipcode(e.target.value)} required />
+
+                    {/* Area of Interest */}
+                    <div className="interest-group" role="group" aria-label="Area of Interest">
+                        <label className="interest-title">Area of Interest:</label>
+                        <div className="interest-options">
+                            {interestOptions.map((opt) => (
+                                <label key={opt} className="checkbox-label">
+                                    <input
+                                        type="checkbox"
+                                        value={opt}
+                                        checked={Array.isArray(interest) && interest.includes(opt)}
+                                        onChange={() => toggleInterest(opt)}
+                                    />
+                                    {opt.charAt(0).toUpperCase() + opt.slice(1)}
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="actionButtons">
+                        <button type="submit" className="submitData">
+                            Update
+                        </button>
+                        <button type="button" className="closeBox" onClick={() => navigate("/")}>
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <Snackbar open={snack.open} message={snack.message} type={snack.type} />
         </div>
     );
 

@@ -3,10 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   userId: null,
   name: null,
-  email: null,
   loginTime: null,
-  token: null,
-  isAuthenticated: false,
 };
 
 const userSlice = createSlice({
@@ -14,7 +11,7 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setUserData: (state, action) => {
-      const { userId, name, email, token } = action.payload;
+      const { userId, name } = action.payload;
       state.userId = userId;
       state.name = name;
       state.loginTime = new Date().toLocaleString();

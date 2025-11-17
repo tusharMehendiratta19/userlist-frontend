@@ -1,10 +1,11 @@
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../style/login.css";
 import { useDispatch } from "react-redux";
 import { setUserData } from "../redux/userSlice";
 import Snackbar from "./Snackbar";
+import constants from "../constants";
+import { loginUser } from "../api/authApi";
 
 const LoginPage = () => {
     const [email, setEmail] = useState("");
@@ -21,11 +22,7 @@ const LoginPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const resp = await axios.post(
-                "http://localhost:5000/v1/auth/login",
-                { email, password },
-                { validateStatus: () => true }
-            );
+            const resp = await loginUser(email, password);
 
             console.log("Login response:", resp.status);
 
@@ -34,19 +31,19 @@ const LoginPage = () => {
                     userId: resp.data.userId,
                     name: resp.data.userName
                 }));
-                showSnack("Login successful", "success");
+                showSnack(constants.loginSuccessMsg, constants.success);
                 setTimeout(() => navigate("/"), 1000);
             } else if (resp.status === 401) {
-                showSnack(resp.data.message, "error");
+                showSnack(resp.data.message, constants.error);
             } else if (resp.status === 404) {
-                showSnack("User not found. Please sign up first.", "error");
+                showSnack(constants.user_not_found, constants.error);
             } else {
-                showSnack("Login failed. Please check your credentials.", "error");
+                showSnack(constants.login_failed, constants.error);
             }
 
         } catch (err) {
             console.error("Unexpected login error:", err);
-            showSnack("Server error during login.", "error");
+            showSnack(constants.login_error, constants.error);
         }
     };
 

@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../style/signup.css";
 import { useSelector, useDispatch } from "react-redux";
 import { setUserData } from "../redux/userSlice";
+import constants from "../constants";
+import Snackbar from "./Snackbar";
+import { locationsList, createUser } from "../api/userApi";
 
 const SignupPage = () => {
     const [firstName, setFirstName] = useState("");
@@ -23,6 +25,12 @@ const SignupPage = () => {
     const [cities, setCities] = useState([]);
     const [allLocations, setAllLocations] = useState([]);
     const { name, userId } = useSelector((state) => state.user);
+    const [snack, setSnack] = useState({ open: false, message: "", type: "" });
+
+    const showSnack = (msg, type) => {
+        setSnack({ open: true, message: msg, type });
+        setTimeout(() => setSnack({ open: false, message: "", type: "" }), 3000);
+    };
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -30,7 +38,7 @@ const SignupPage = () => {
     useEffect(() => {
         async function getLocation() {
             try {
-                const response = await axios.get("http://localhost:5000/v1/users/locations");
+                const response = await locationsList();
                 const locationData = response.data.locations || [];
                 setAllLocations(locationData);
 
@@ -94,11 +102,11 @@ const SignupPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (password !== confirmPassword) {
-            alert("Passwords do not match!");
+            alert(constants.password_mismatch);
             return;
         }
         try {
-            const response = await axios.post("http://localhost:5000/v1/users/register", {
+            const response = await createUser({
                 firstName,
                 lastName,
                 email,
@@ -118,94 +126,182 @@ const SignupPage = () => {
                         name: response.data.name
                     }));
                 }
-                navigate("/");
+                showSnack(constants.signup_success, constants.success);
+                setTimeout(() => navigate("/"), 1000);
+            } else if (response.status === 400) {
+                showSnack(response.data.message, constants.error);
+            } else {
+                showSnack(constants.signup_failed, constants.error);
             }
         } catch (error) {
             console.error("Error creating user:", error);
         }
     };
 
+    const handleCancel = () => {
+        userId === null ? navigate("/login") : navigate("/");
+    }
+
+    const [profileFile, setProfileFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
+
+    useEffect(() => {
+        if (!profileFile) {
+            setPreviewUrl(null);
+            return;
+        }
+        const url = URL.createObjectURL(profileFile);
+        setPreviewUrl(url);
+        return () => URL.revokeObjectURL(url);
+    }, [profileFile]);
+
+    const customSubmit = async (e) => {
+        e.preventDefault();
+        if (password !== confirmPassword) {
+            alert(constants.password_mismatch);
+            return;
+        }
+        try {
+            // Build multipart form data so we can include an image
+            const formData = new FormData();
+            formData.append("firstName", firstName);
+            formData.append("lastName", lastName);
+            formData.append("email", email);
+            formData.append("password", password);
+            formData.append("gender", gender);
+            formData.append("city", city);
+            formData.append("state", state);
+            formData.append("country", country);
+            formData.append("zipcode", zipcode);
+            formData.append("interest", JSON.stringify(interest || [])); // send as JSON string
+            if (profileFile) {
+                formData.append("profileImage", profileFile);
+            }
+
+            // createUser should accept FormData and send multipart/form-data
+            const response = await createUser(formData);
+
+            if (response.status === 201) {
+                if (userId === null) {
+                    dispatch(
+                        setUserData({
+                            userId: response.data.userId,
+                            name: response.data.name,
+                        })
+                    );
+                }
+                showSnack(constants.signup_success, constants.success);
+                setTimeout(() => navigate("/"), 1000);
+            } else if (response.status === 400) {
+                showSnack(response.data.message, constants.error);
+            } else {
+                showSnack(constants.signup_failed, constants.error);
+            }
+        } catch (error) {
+            console.error("Error creating user:", error);
+            showSnack(constants.signup_failed, constants.error);
+        }
+    };
+
     return (
-        <div className="signup-container">
-            <h2>Signup Page</h2>
-            <form className="signup-form" onSubmit={handleSubmit}>
-                <input type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
-                <input type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
-                <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <div>
+            <div className="signup-container">
+                <h2>Signup Page</h2>
+                <form className="signup-form" onSubmit={customSubmit} encType="multipart/form-data">
+                    <input type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+                    <input type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                    <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
 
-                {/* Gender dropdown */}
-                <select value={gender} onChange={(e) => setGender(e.target.value)} required>
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                </select>
+                    {/* Gender dropdown */}
+                    <select value={gender} onChange={(e) => setGender(e.target.value)} required>
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
 
-                {/* Country dropdown */}
-                <select value={country} onChange={handleCountryChange} required>
-                    <option value="">Select Country</option>
-                    {countries.map((c, idx) => (
-                        <option key={idx} value={c}>
-                            {c}
-                        </option>
-                    ))}
-                </select>
-
-                {/* State dropdown */}
-                <select value={state} onChange={handleStateChange} disabled={!country} required>
-                    <option value="">Select State</option>
-                    {states.map((s, idx) => (
-                        <option key={idx} value={s}>
-                            {s}
-                        </option>
-                    ))}
-                </select>
-
-                {/* City dropdown */}
-                <select value={city} onChange={(e) => setCity(e.target.value)} disabled={!state} required>
-                    <option value="">Select City</option>
-                    {cities.map((city, idx) => (
-                        <option key={idx} value={city}>
-                            {city}
-                        </option>
-                    ))}
-                </select>
-
-                <input type="tel" minLength={6} maxLength={6} placeholder="Zipcode" value={zipcode} onChange={(e) => setZipcode(e.target.value)} required />
-
-                {/* Area of Interest */}
-                <div className="interest-group" role="group" aria-label="Area of Interest">
-                    <label className="interest-title">Area of Interest:</label>
-                    <div className="interest-options">
-                        {interestOptions.map((opt) => (
-                            <label key={opt} className="checkbox-label">
-                                <input
-                                    type="checkbox"
-                                    value={opt}
-                                    checked={Array.isArray(interest) && interest.includes(opt)}
-                                    onChange={() => toggleInterest(opt)}
-                                />
-                                {opt.charAt(0).toUpperCase() + opt.slice(1)}
-                            </label>
+                    {/* Country dropdown */}
+                    <select value={country} onChange={handleCountryChange} required>
+                        <option value="">Select Country</option>
+                        {countries.map((c, idx) => (
+                            <option key={idx} value={c}>
+                                {c}
+                            </option>
                         ))}
+                    </select>
+
+                    {/* State dropdown */}
+                    <select value={state} onChange={handleStateChange} disabled={!country} required>
+                        <option value="">Select State</option>
+                        {states.map((s, idx) => (
+                            <option key={idx} value={s}>
+                                {s}
+                            </option>
+                        ))}
+                    </select>
+
+                    {/* City dropdown */}
+                    <select value={city} onChange={(e) => setCity(e.target.value)} disabled={!state} required>
+                        <option value="">Select City</option>
+                        {cities.map((city, idx) => (
+                            <option key={idx} value={city}>
+                                {city}
+                            </option>
+                        ))}
+                    </select>
+
+                    <input type="tel" minLength={6} maxLength={6} placeholder="Zipcode" value={zipcode} onChange={(e) => setZipcode(e.target.value)} required />
+
+                    {/* Area of Interest */}
+                    <div className="interest-group" role="group" aria-label="Area of Interest">
+                        <label className="interest-title">Area of Interest:</label>
+                        <div className="interest-options">
+                            {interestOptions.map((opt) => (
+                                <label key={opt} className="checkbox-label">
+                                    <input
+                                        type="checkbox"
+                                        value={opt}
+                                        checked={Array.isArray(interest) && interest.includes(opt)}
+                                        onChange={() => toggleInterest(opt)}
+                                    />
+                                    {opt.charAt(0).toUpperCase() + opt.slice(1)}
+                                </label>
+                            ))}
+                        </div>
                     </div>
-                </div>
 
-                <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+                    <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
 
-                <div className="actionButtons">
-                    <button type="submit" className="submitData">
-                        Sign Up
-                    </button>
-                    <button type="button" className="closeBox" onClick={() => navigate("/login")}>
-                        Cancel
-                    </button>
-                </div>
-            </form>
-            <p>
-                Already a User? login <span onClick={() => navigate("/login")}>here</span>
-            </p>
+                    {/* Profile image input */}
+                    <label className="file-label">
+                        Profile Picture (optional)
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => setProfileFile(e.target.files && e.target.files[0])}
+                        />
+                    </label>
+                    {previewUrl && (
+                        <div className="preview">
+                            <img src={previewUrl} alt="Preview" style={{ maxWidth: "100px", maxHeight: "100px" }} />
+                        </div>
+                    )}
+
+                    <div className="actionButtons">
+                        <button type="submit" className="submitData">
+                            Sign Up
+                        </button>
+                        <button type="button" className="closeBox" onClick={handleCancel}>
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+                <p>
+                    Already a User? login <span onClick={() => navigate("/login")}>here</span>
+                </p>
+            </div>
+            <Snackbar open={snack.open} message={snack.message} type={snack.type} />
         </div>
     );
 };
