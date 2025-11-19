@@ -4,6 +4,7 @@ let constants = {
   login_error: "Server error during login.",
   user_not_found: "User not found. Please sign up first.",
   logout_failed: "Error logging out. Try again.",
+  logout_success: "Logged out successfully.",
   user_delete_failed: "Failed to delete user. Please try again.",
   user_delete_success: "User deleted successfully",
   server_error: "Server error during login.",

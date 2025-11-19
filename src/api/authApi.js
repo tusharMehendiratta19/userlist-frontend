@@ -11,3 +11,7 @@ export const logoutUser = async () => {
 export const changePassword = async () => {
     return await api.get("/auth/changePassword");
 };
+
+export const getLoggedInUser = async () => {
+    return await api.get("/auth/getLoggedInUser");
+}

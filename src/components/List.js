@@ -53,7 +53,8 @@ const List = () => {
         try {
             await logoutUser();
             dispatch(clearUserData())
-            showSnack(constants.loginSuccessMsg, constants.success);
+            sessionStorage.removeItem("userId");
+            showSnack(constants.logout_success, constants.success);
             setTimeout(() => navigate("/login"), 1000);
         } catch (error) {
             console.error("Logout failed:", error);
@@ -98,18 +99,18 @@ const List = () => {
         return <div className="loading">Loading...</div>;
     }
 
-    // if (error) {
-    //     return (
-    //         <div className="error-container">
-    //             <h2>{error}</h2>
-    //             <button className="login-btn" onClick={() => navigate("/login")}>
-    //                 Go to Login
-    //             </button>
-    //         </div>
-    //     );
-    // }
+    if (error) {
+        return (
+            <div className="error-container">
+                <h2>{error}</h2>
+                <button className="login-btn" onClick={() => navigate("/login")}>
+                    Go to Login
+                </button>
+            </div>
+        );
+    }
 
-    console.log("Users data:", users);
+    // console.log("Users data:", users);
 
     return (
         <div>
@@ -136,7 +137,7 @@ const List = () => {
                                 <th>Gender</th>
                                 <th>Address</th>
                                 <th>Area of Interest</th>
-                                {/* <th>profile</th> */}
+                                <th>profile</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -155,13 +156,13 @@ const List = () => {
                                             ))
                                             : user.interest}
                                     </td>
-                                    {/* <td>
+                                    <td>
                                         <img
                                             src={user.profileImage ? `${constants.base_url}${user.profileImage}` : "/default-avatar.png"}
                                             alt="profile"
-                                            style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover" }}
+                                            style={{ width: "40px", height: "40px" }}
                                         />
-                                    </td> */}
+                                    </td>
 
                                     <td>
                                         <button

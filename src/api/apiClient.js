@@ -24,15 +24,14 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        // Token expired → try refresh token
-        if (error.response?.status === 403 && !originalRequest._retry) {
+        if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
             try {
-                await api.get("/auth/refresh-token"); // backend should send new token cookies
-                return api(originalRequest);          // retry original request
+                await api.post("/auth/refresh-token");
+                return api(originalRequest);
             } catch (refreshErr) {
-                console.error("Refresh token failed", refreshErr);
+                console.error("Token refresh failed", refreshErr);
                 return Promise.reject(refreshErr);
             }
         }

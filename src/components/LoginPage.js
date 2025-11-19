@@ -31,6 +31,7 @@ const LoginPage = () => {
                     userId: resp.data.userId,
                     name: resp.data.userName
                 }));
+                sessionStorage.setItem("userId", resp.data.userId);
                 showSnack(constants.loginSuccessMsg, constants.success);
                 setTimeout(() => navigate("/"), 1000);
             } else if (resp.status === 401) {
