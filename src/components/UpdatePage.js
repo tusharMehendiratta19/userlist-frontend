@@ -35,51 +35,57 @@ const UpdatePage = (props) => {
         setSnack({ open: true, message: msg, type });
         setTimeout(() => setSnack({ open: false, message: "", type: "" }), 3000);
     };
-    // Fetch location data
-    useEffect(() => {
-        async function getLocation() {
-            try {
-                const response = await locationsList();
-                const locationData = response.data.locations || [];
-                setAllLocations(locationData);
 
-                // Populate country dropdown
-                const countryList = locationData.map((loc) => loc.country);
-                setCountries(countryList);
-            } catch (err) {
-                console.error("Error fetching locations:", err);
-            }
+
+    async function getLocation() {
+        try {
+            const response = await locationsList();
+            console.log("Locations response:", response.data);
+
+            const countriesData = response.data?.countries || [];
+
+            setAllLocations(countriesData);
+
+            // Populate Country dropdown
+            setCountries(countriesData.map((c) => ({ id: c.id, name: c.name })));
+
+        } catch (err) {
+            console.error("Error fetching locations:", err);
         }
-        getLocation();
-    }, []);
+    }
 
-    // Handle country change
+
     const handleCountryChange = (e) => {
-        const selectedCountry = e.target.value;
-        setCountry(selectedCountry);
+        console.log("handleCountryChange")
+        const selectedCountryId = Number(e.target.value);
+
+        setCountry(selectedCountryId);
         setState("");
         setCity("");
-        setCities([]);
 
-        const countryData = allLocations.find((c) => c.country === selectedCountry);
-        if (countryData) {
-            const stateList = countryData.states.map((s) => s.name);
-            setStates(stateList);
+        const countryObj = allLocations.find((c) => c.id === selectedCountryId);
+
+        if (countryObj) {
+            setStates(countryObj.states.map((s) => ({ id: s.id, name: s.name })));
         } else {
             setStates([]);
         }
+
+        setCities([]);
     };
 
-    // Handle state change
     const handleStateChange = (e) => {
-        const selectedState = e.target.value;
-        setState(selectedState);
+        const selectedStateId = Number(e.target.value);
+
+        setState(selectedStateId);
         setCity("");
 
-        const countryData = allLocations.find((c) => c.country === country);
-        const stateData = countryData?.states.find((s) => s.name === selectedState);
-        if (stateData) {
-            setCities(stateData.cities);
+        const countryObj = allLocations.find((c) => c.id === country);
+
+        const stateObj = countryObj?.states.find((s) => s.id === selectedStateId);
+
+        if (stateObj) {
+            setCities(stateObj.cities.map((city) => ({ id: city.id, name: city.name })));
         } else {
             setCities([]);
         }
@@ -101,31 +107,73 @@ const UpdatePage = (props) => {
     };
 
     useEffect(() => {
+        if (!custId) return;
+
         let cancel = false;
 
-        const fetchCustomerDetails = async () => {
+        const loadData = async () => {
             try {
+                // STEP 1: Get user details
                 const { data } = await getUserById(custId);
-                if (cancel) return; // skip state updates if unmounted
+                if (cancel) return;
+
                 const user = data.user;
+
+                // STEP 2: Get locations
+                const locationsRes = await locationsList();
+                if (cancel) return;
+
+                const countriesData = locationsRes.data.countries || [];
+
+                setAllLocations(countriesData);
+
+                // Populate country dropdown
+                const formattedCountries = countriesData.map(c => ({
+                    id: c.id,
+                    name: c.name
+                }));
+                setCountries(formattedCountries);
+
+                // STEP 3: Auto-select country
+                const selectedCountry = countriesData.find(c => c.id === user.countryId);
+
+                if (selectedCountry) {
+                    setStates(
+                        selectedCountry.states.map(s => ({ id: s.id, name: s.name }))
+                    );
+                }
+
+                // STEP 4: Auto-select state
+                const selectedState = selectedCountry?.states.find(s => s.id === user.stateId);
+
+                if (selectedState) {
+                    setCities(
+                        selectedState.cities.map(ct => ({ id: ct.id, name: ct.name }))
+                    );
+                }
+
+                // STEP 5: Set user form values AFTER dropdowns exist
                 setFirstName(user.firstName);
                 setLastName(user.lastName);
                 setEmail(user.email);
                 setGender(user.gender);
-                setCity(user.city);
-                setState(user.state);
-                setCountry(user.country);
+                setCity(user.cityId);
+                setState(user.stateId);
+                setCountry(user.countryId);
                 setZipcode(user.zipcode);
                 setInterest(user.interest);
-            } catch (error) {
-                if (!cancel) console.error("Error fetching customer details:", error);
+
+            } catch (err) {
+                if (!cancel) console.error("Error loading:", err);
             }
         };
 
-        if (custId) fetchCustomerDetails();
+        loadData();
 
-        return () => { cancel = true; }; // cleanup flag
+        return () => (cancel = true);
+
     }, [custId]);
+
 
 
     const handleSubmit = async (e) => {
@@ -190,33 +238,26 @@ const UpdatePage = (props) => {
                         <option value="Other">Other</option>
                     </select>
 
-                    {/* Country dropdown */}
                     <select value={country} onChange={handleCountryChange} required>
                         <option value="">Select Country</option>
-                        {countries.map((c, idx) => (
-                            <option key={idx} value={c}>
-                                {c}
-                            </option>
+                        {countries.map((c) => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
                         ))}
                     </select>
 
-                    {/* State dropdown */}
-                    <select value={state} onChange={handleStateChange} disabled={!country} required>
+
+                    <select value={state} onChange={handleStateChange} required>
                         <option value="">Select State</option>
-                        {states.map((s, idx) => (
-                            <option key={idx} value={s}>
-                                {s}
-                            </option>
+                        {states.map((s) => (
+                            <option key={s.id} value={s.id}>{s.name}</option>
                         ))}
                     </select>
 
-                    {/* City dropdown */}
-                    <select value={city} onChange={(e) => setCity(e.target.value)} disabled={!state} required>
+
+                    <select value={city} onChange={(e) => setCity(Number(e.target.value))} required>
                         <option value="">Select City</option>
-                        {cities.map((city, idx) => (
-                            <option key={idx} value={city}>
-                                {city}
-                            </option>
+                        {cities.map((c) => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
                         ))}
                     </select>
 

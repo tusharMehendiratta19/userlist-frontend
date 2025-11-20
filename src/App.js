@@ -6,36 +6,7 @@ import PasswordChange from './components/PasswordChange';
 import LoginPage from './components/LoginPage';
 import './App.css';
 
-import axios from 'axios';
-import { useDispatch, useSelector } from 'react-redux';
-import { setUserData, clearUserData } from './redux/userSlice';
-import { useEffect } from 'react';
-
 function App() {
-  const dispatch = useDispatch();
-  // const userId = useSelector((state) => state.user.userId);
-
-  const loadUser = async () => {
-    try {
-      const resp = await axios.get(
-        "http://localhost:5000/v1/auth/getLoggedInUser",
-        { withCredentials: true }
-      );
-
-      dispatch(setUserData({
-        userId: resp.data.userId,
-        name: resp.data.name,
-        loginTime: new Date().toLocaleString()
-      }));
-    } catch (err) {
-      dispatch(clearUserData());
-    }
-  };
-
-  useEffect(() => {
-    loadUser();
-  }, []);
-
   const userId = sessionStorage.getItem("userId");
   console.log("ProtectedRoute userId:", userId);
 

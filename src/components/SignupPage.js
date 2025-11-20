@@ -39,50 +39,59 @@ const SignupPage = () => {
         async function getLocation() {
             try {
                 const response = await locationsList();
-                const locationData = response.data.locations || [];
-                setAllLocations(locationData);
+                console.log("Locations response:", response.data);
 
-                // Populate country dropdown
-                const countryList = locationData.map((loc) => loc.country);
-                setCountries(countryList);
+                const countriesData = response.data?.countries || [];
+
+                setAllLocations(countriesData);
+
+                // Populate Country dropdown
+                setCountries(countriesData.map((c) => ({ id: c.id, name: c.name })));
+
             } catch (err) {
                 console.error("Error fetching locations:", err);
             }
         }
+
         getLocation();
     }, []);
 
-    // Handle country change
+
     const handleCountryChange = (e) => {
-        const selectedCountry = e.target.value;
-        setCountry(selectedCountry);
+        const selectedCountryId = Number(e.target.value);
+
+        setCountry(selectedCountryId);
         setState("");
         setCity("");
-        setCities([]);
 
-        const countryData = allLocations.find((c) => c.country === selectedCountry);
-        if (countryData) {
-            const stateList = countryData.states.map((s) => s.name);
-            setStates(stateList);
+        const countryObj = allLocations.find((c) => c.id === selectedCountryId);
+
+        if (countryObj) {
+            setStates(countryObj.states.map((s) => ({ id: s.id, name: s.name })));
         } else {
             setStates([]);
         }
+
+        setCities([]);
     };
 
-    // Handle state change
     const handleStateChange = (e) => {
-        const selectedState = e.target.value;
-        setState(selectedState);
+        const selectedStateId = Number(e.target.value);
+
+        setState(selectedStateId);
         setCity("");
 
-        const countryData = allLocations.find((c) => c.country === country);
-        const stateData = countryData?.states.find((s) => s.name === selectedState);
-        if (stateData) {
-            setCities(stateData.cities);
+        const countryObj = allLocations.find((c) => c.id === country);
+
+        const stateObj = countryObj?.states.find((s) => s.id === selectedStateId);
+
+        if (stateObj) {
+            setCities(stateObj.cities.map((city) => ({ id: city.id, name: city.name })));
         } else {
             setCities([]);
         }
     };
+
 
 
     const interestOptions = ["technology", "sports", "music", "art", "science", "travel", "cooking"];
@@ -99,44 +108,44 @@ const SignupPage = () => {
         }
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (password !== confirmPassword) {
-            alert(constants.password_mismatch);
-            return;
-        }
-        try {
-            const response = await createUser({
-                firstName,
-                lastName,
-                email,
-                password,
-                gender,
-                city,
-                state,
-                country,
-                zipcode,
-                interest,
-            });
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+    //     if (password !== confirmPassword) {
+    //         alert(constants.password_mismatch);
+    //         return;
+    //     }
+    //     try {
+    //         const response = await createUser({
+    //             firstName,
+    //             lastName,
+    //             email,
+    //             password,
+    //             gender,
+    //             city,
+    //             state,
+    //             country,
+    //             zipcode,
+    //             interest,
+    //         });
 
-            if (response.status === 201) {
-                if (userId === null) {
-                    dispatch(setUserData({
-                        userId: response.data.userId,
-                        name: response.data.name
-                    }));
-                }
-                showSnack(constants.signup_success, constants.success);
-                setTimeout(() => navigate("/"), 1000);
-            } else if (response.status === 400) {
-                showSnack(response.data.message, constants.error);
-            } else {
-                showSnack(constants.signup_failed, constants.error);
-            }
-        } catch (error) {
-            console.error("Error creating user:", error);
-        }
-    };
+    //         if (response.status === 201) {
+    //             if (userId === null) {
+    //                 dispatch(setUserData({
+    //                     userId: response.data.userId,
+    //                     name: response.data.name
+    //                 }));
+    //             }
+    //             showSnack(constants.signup_success, constants.success);
+    //             setTimeout(() => navigate("/"), 1000);
+    //         } else if (response.status === 400) {
+    //             showSnack(response.data.message, constants.error);
+    //         } else {
+    //             showSnack(constants.signup_failed, constants.error);
+    //         }
+    //     } catch (error) {
+    //         console.error("Error creating user:", error);
+    //     }
+    // };
 
     const handleCancel = () => {
         userId === null ? navigate("/login") : navigate("/");
@@ -220,35 +229,29 @@ const SignupPage = () => {
                         <option value="Other">Other</option>
                     </select>
 
-                    {/* Country dropdown */}
-                    <select value={country} onChange={handleCountryChange} required>
+                    <select value={country} onChange={handleCountryChange}>
                         <option value="">Select Country</option>
-                        {countries.map((c, idx) => (
-                            <option key={idx} value={c}>
-                                {c}
-                            </option>
+                        {countries.map((c) => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
                         ))}
                     </select>
 
-                    {/* State dropdown */}
-                    <select value={state} onChange={handleStateChange} disabled={!country} required>
+
+                    <select value={state} onChange={handleStateChange}>
                         <option value="">Select State</option>
-                        {states.map((s, idx) => (
-                            <option key={idx} value={s}>
-                                {s}
-                            </option>
+                        {states.map((s) => (
+                            <option key={s.id} value={s.id}>{s.name}</option>
                         ))}
                     </select>
 
-                    {/* City dropdown */}
-                    <select value={city} onChange={(e) => setCity(e.target.value)} disabled={!state} required>
+
+                    <select value={city} onChange={(e) => setCity(Number(e.target.value))}>
                         <option value="">Select City</option>
-                        {cities.map((city, idx) => (
-                            <option key={idx} value={city}>
-                                {city}
-                            </option>
+                        {cities.map((c) => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
                         ))}
                     </select>
+
 
                     <input type="tel" minLength={6} maxLength={6} placeholder="Zipcode" value={zipcode} onChange={(e) => setZipcode(e.target.value)} required />
 

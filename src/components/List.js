@@ -20,6 +20,7 @@ const List = () => {
     const [totalUsers, setTotalUsers] = useState(0);
     const pageNo = skip / limit + 1;
     const [snack, setSnack] = useState({ open: false, message: "", type: "" });
+    let userId = sessionStorage.getItem("userId");
 
     const showSnack = (msg, type) => {
         setSnack({ open: true, message: msg, type });
@@ -77,7 +78,8 @@ const List = () => {
     };
 
     const handleUpdate = (userId) => {
-        if (name !== null) {
+        console.log("userId:", userId);
+        if (userId !== null) {
             navigate("/updateDetails", { state: { custId: userId } });
         }
     };
@@ -87,7 +89,7 @@ const List = () => {
         try {
             await apiDeleteUser(userId);
             showSnack(constants.user_delete_success, constants.success);
-            setUsers(users.filter((user) => user._id !== userId));
+            setUsers(users.filter((user) => user.id !== userId));
             setTotalUsers(totalUsers - 1);
         } catch (error) {
             console.error("Error deleting user:", error);
@@ -137,13 +139,13 @@ const List = () => {
                                 <th>Gender</th>
                                 <th>Address</th>
                                 <th>Area of Interest</th>
-                                <th>profile</th>
+                                {/* <th>profile</th> */}
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody className="user-table-body">
                             {users.map((user, index) => (
-                                <tr key={user._id}>
+                                <tr key={index + 1}>
                                     <td>{index + 1}</td>
                                     <td>{user.firstName} {user.lastName}</td>
                                     <td>{user.email}</td>
@@ -156,21 +158,21 @@ const List = () => {
                                             ))
                                             : user.interest}
                                     </td>
-                                    <td>
+                                    {/* <td>
                                         <img
                                             src={user.profileImage ? `${constants.base_url}${user.profileImage}` : "/default-avatar.png"}
                                             alt="profile"
                                             style={{ width: "40px", height: "40px" }}
                                         />
-                                    </td>
+                                    </td> */}
 
                                     <td>
                                         <button
-                                            onClick={() => handleUpdate(user._id)}
+                                            onClick={() => handleUpdate(user.id)}
                                         >
                                             Edit
                                         </button>
-                                        <button onClick={() => deleteUser(user._id)}>Delete</button>
+                                        <button onClick={() => deleteUser(user.id)}>Delete</button>
                                     </td>
                                 </tr>
                             ))}
