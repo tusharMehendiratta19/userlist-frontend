@@ -14,7 +14,7 @@ body {
   z-index: 10;
   /* max-width: 450px; */
   /* margin: 3rem auto; */
-  width: 20%;
+  width: 30%;
   padding: 2rem;
   background: #fff;
   border-radius: 12px;
@@ -42,6 +42,23 @@ body {
   gap: 1rem;
 }
 
+.signup-form .subdiv{
+  display: flex;
+  justify-content: space-between;
+}
+
+.subdiv1 input, .subdiv3 input, .subdiv4 input{
+  width: 44%;
+}
+
+.subdiv3 select{
+  width: 48%;
+}
+
+.subdiv2 select{
+  width: 31%;
+}
+
 /* === Input Fields === */
 .signup-form input {
   padding: 0.75rem;
@@ -67,18 +84,21 @@ body {
 
 .interest-group {
   display: flex;
-  gap: 1rem;
-  align-items: center;
+  flex-direction: column;
+  gap: 0.7rem;
+  /* align-items: center; */
 }
 
-.interest-group label {
+.interest-group span, .interest-group label {
   font-size: 0.95rem;
   color: #555;
+  margin-left: 1%;
 }
 
 .interest-group input {
   width: auto;
-  margin-right: 0.5rem;
+  color: #555;
+  margin-right: 0.4rem;
 }
 
 .signup-form input:focus {
@@ -89,6 +109,15 @@ body {
 
 .signup-form input::placeholder {
   color: #aaa;
+}
+
+.file-label{
+  display: flex;
+  justify-content: space-between;
+}
+
+.file-label input{
+  width: 60%;
 }
 
 .actionButtons {
@@ -134,7 +163,7 @@ body {
 }
 
 .signup-container p {
-  margin-top: 1.2rem;
+  margin-top: 1.5rem;
   font-size: 0.95rem;
   color: #555;
   text-align: center;
@@ -150,12 +179,18 @@ body {
 /* === Responsive === */
 @media (max-width: 500px) {
   .signup-container {
-    margin: 1.5rem;
-    padding: 1.5rem;
+    margin-left: 10%;
+    padding: 1rem;
+    width: 80%;
+  }
+
+  .subdiv{
+    flex-direction: column;
   }
 
   .signup-form input,
   .signup-form button {
     font-size: 0.9rem;
+    width: 90%;
   }
 }

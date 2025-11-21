@@ -217,47 +217,50 @@ const SignupPage = () => {
             <div className="signup-container">
                 <h2>Signup Page</h2>
                 <form className="signup-form" onSubmit={customSubmit} encType="multipart/form-data">
-                    <input type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
-                    <input type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                    <div className="subdiv subdiv1">
+                        <input type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+                        <input type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                    </div>
                     <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
 
-                    {/* Gender dropdown */}
-                    <select value={gender} onChange={(e) => setGender(e.target.value)} required>
-                        <option value="">Select Gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                    </select>
-
-                    <select value={country} onChange={handleCountryChange}>
-                        <option value="">Select Country</option>
-                        {countries.map((c) => (
-                            <option key={c.id} value={c.id}>{c.name}</option>
-                        ))}
-                    </select>
+                    <div className="subdiv subdiv2">
+                        <select value={country} onChange={handleCountryChange}>
+                            <option value="">Select Country</option>
+                            {countries.map((c) => (
+                                <option key={c.id} value={c.id}>{c.name}</option>
+                            ))}
+                        </select>
 
 
-                    <select value={state} onChange={handleStateChange}>
-                        <option value="">Select State</option>
-                        {states.map((s) => (
-                            <option key={s.id} value={s.id}>{s.name}</option>
-                        ))}
-                    </select>
+                        <select value={state} onChange={handleStateChange}>
+                            <option value="">Select State</option>
+                            {states.map((s) => (
+                                <option key={s.id} value={s.id}>{s.name}</option>
+                            ))}
+                        </select>
 
 
-                    <select value={city} onChange={(e) => setCity(Number(e.target.value))}>
-                        <option value="">Select City</option>
-                        {cities.map((c) => (
-                            <option key={c.id} value={c.id}>{c.name}</option>
-                        ))}
-                    </select>
+                        <select value={city} onChange={(e) => setCity(Number(e.target.value))}>
+                            <option value="">Select City</option>
+                            {cities.map((c) => (
+                                <option key={c.id} value={c.id}>{c.name}</option>
+                            ))}
+                        </select>
+                    </div>
 
+                    <div className="subdiv subdiv3">
+                        <input type="tel" minLength={6} maxLength={6} placeholder="Zipcode" value={zipcode} onChange={(e) => setZipcode(e.target.value)} required />
 
-                    <input type="tel" minLength={6} maxLength={6} placeholder="Zipcode" value={zipcode} onChange={(e) => setZipcode(e.target.value)} required />
+                        <select value={gender} onChange={(e) => setGender(e.target.value)} required>
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
 
-                    {/* Area of Interest */}
                     <div className="interest-group" role="group" aria-label="Area of Interest">
-                        <label className="interest-title">Area of Interest:</label>
+                        <span className="interest-title">Area of Interest:</span>
                         <div className="interest-options">
                             {interestOptions.map((opt) => (
                                 <label key={opt} className="checkbox-label">
@@ -273,12 +276,14 @@ const SignupPage = () => {
                         </div>
                     </div>
 
-                    <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                    <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+                    <div className="subdiv  subdiv4">
+                        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                        <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+                    </div>
 
                     {/* Profile image input */}
                     <label className="file-label">
-                        Profile Picture (optional)
+                        <p>Profile Picture (optional):</p>
                         <input
                             type="file"
                             accept="image/*"

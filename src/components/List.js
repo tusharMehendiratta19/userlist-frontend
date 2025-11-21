@@ -139,7 +139,7 @@ const List = () => {
                                 <th>Gender</th>
                                 <th>Address</th>
                                 <th>Area of Interest</th>
-                                {/* <th>profile</th> */}
+                                <th>profile</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -158,13 +158,13 @@ const List = () => {
                                             ))
                                             : user.interest}
                                     </td>
-                                    {/* <td>
+                                    <td>
                                         <img
-                                            src={user.profileImage ? `${constants.base_url}${user.profileImage}` : "/default-avatar.png"}
+                                            src={user.profileImage ? `${user.profileImage}` : "/default-avatar.png"}
                                             alt="profile"
                                             style={{ width: "40px", height: "40px" }}
                                         />
-                                    </td> */}
+                                    </td>
 
                                     <td>
                                         <button
