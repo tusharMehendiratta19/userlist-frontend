@@ -23,7 +23,7 @@ function App() {
       <Routes>
         <Route
           path="/"
-          element={<ProtectedRoute><List /></ProtectedRoute>}
+          element={<List />}
         />
 
         <Route path="/signup" element={<SignupPage />} />
@@ -35,7 +35,7 @@ function App() {
 
         <Route
           path="/changePassword"
-          element={<ProtectedRoute><PasswordChange /></ProtectedRoute>}
+          element={<PasswordChange />}
         />
 
         <Route path="/login" element={<LoginPage />} />

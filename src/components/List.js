@@ -16,11 +16,13 @@ const List = () => {
     const { name, loginTime } = useSelector((state) => state.user);
     const navigate = useNavigate();
     const [skip, setSkip] = useState(0);
-    const [limit, setLimit] = useState(5);
+    const limit = 5
     const [totalUsers, setTotalUsers] = useState(0);
     const pageNo = skip / limit + 1;
     const [snack, setSnack] = useState({ open: false, message: "", type: "" });
-    let userId = sessionStorage.getItem("userId");
+    
+    let username = sessionStorage.getItem("name");
+    let login = sessionStorage.getItem("loginTime");
 
     const showSnack = (msg, type) => {
         setSnack({ open: true, message: msg, type });
@@ -55,6 +57,8 @@ const List = () => {
             await logoutUser();
             dispatch(clearUserData())
             sessionStorage.removeItem("userId");
+            sessionStorage.removeItem("name");
+            sessionStorage.removeItem("loginTime");
             showSnack(constants.logout_success, constants.success);
             setTimeout(() => navigate("/login"), 1000);
         } catch (error) {
@@ -118,8 +122,8 @@ const List = () => {
         <div>
             <div className="main-container">
                 <div className="header">
-                    <p>Login Time: {loginTime}</p>
-                    <p>Logged in as: {name}</p>
+                    <p>Login Time: {loginTime ? loginTime : login}</p>
+                    <p>Logged in as: {name ? name : username}</p>
                     <button onClick={handleLogout}>Log Out</button>
                 </div>
 

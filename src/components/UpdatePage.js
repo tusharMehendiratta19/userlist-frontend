@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import '../style/signup.css';
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { setUserData } from "../redux/userSlice";
 import Snackbar from "./Snackbar";
 import constants from '../constants';
@@ -11,8 +11,6 @@ const UpdatePage = (props) => {
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
     const [gender, setGender] = useState("");
     const [city, setCity] = useState("");
     const [state, setState] = useState("");
@@ -36,23 +34,6 @@ const UpdatePage = (props) => {
         setTimeout(() => setSnack({ open: false, message: "", type: "" }), 3000);
     };
 
-
-    async function getLocation() {
-        try {
-            const response = await locationsList();
-            console.log("Locations response:", response.data);
-
-            const countriesData = response.data?.countries || [];
-
-            setAllLocations(countriesData);
-
-            // Populate Country dropdown
-            setCountries(countriesData.map((c) => ({ id: c.id, name: c.name })));
-
-        } catch (err) {
-            console.error("Error fetching locations:", err);
-        }
-    }
 
 
     const handleCountryChange = (e) => {
