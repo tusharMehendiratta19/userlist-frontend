@@ -56,9 +56,7 @@ const List = () => {
         try {
             await logoutUser();
             dispatch(clearUserData())
-            sessionStorage.removeItem("userId");
-            sessionStorage.removeItem("name");
-            sessionStorage.removeItem("loginTime");
+            sessionStorage.clear()
             showSnack(constants.logout_success, constants.success);
             setTimeout(() => navigate("/login"), 1000);
         } catch (error) {
